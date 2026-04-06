@@ -51,10 +51,10 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 
 const AppLogo = () => (
   <div className="flex items-center gap-4">
-    <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
-      <Wallet className="text-white" size={24} />
+    <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+      <Wallet className="text-white" size={20} />
     </div>
-    <span className="text-2xl font-black text-white leading-none tracking-tighter">Wallet</span>
+    <span className="text-xl font-black text-white leading-none tracking-tighter">Wallet</span>
   </div>
 );
 
@@ -91,8 +91,8 @@ const CustomPieChart = ({ data, categoryMap }) => {
             <g key={slice.name} className="transition-all duration-300 cursor-pointer group">
               <path d={pathData} fill={categoryMap[slice.name] || '#cbd5e1'} stroke="#ffffff" strokeWidth="4" className="group-hover:scale-105 origin-center transition-transform duration-300" />
               <g className="pointer-events-none transition-all duration-300 group-hover:scale-110 origin-center">
-                <text x={textX} y={textY} textAnchor={textAnchor} alignmentBaseline="middle" className="text-[28px] md:text-[24px] font-black fill-slate-900 drop-shadow-sm">{slice.name}</text>
-                <text x={textX} y={textY + 36} textAnchor={textAnchor} alignmentBaseline="middle" className="text-[24px] md:text-[20px] font-bold fill-blue-600">{percent}%</text>
+                <text x={textX} y={textY} textAnchor={textAnchor} alignmentBaseline="middle" className="text-[32px] md:text-[24px] font-black fill-slate-900 drop-shadow-sm">{slice.name}</text>
+                <text x={textX} y={textY + 40} textAnchor={textAnchor} alignmentBaseline="middle" className="text-[28px] md:text-[20px] font-bold fill-blue-600">{percent}%</text>
               </g>
             </g>
           );
@@ -108,7 +108,7 @@ const CustomBarChart = ({ data }) => {
   const height = 350;
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 1.5;
-  const maxVal = Math.max(...data.flatMap(d => [d.netto25 || 0, d.brutto25 || 0, d.netto30 || 0, d.brutto30 || 0]), 1000);
+  const maxVal = Math.max(...data.flatMap(d => [d.netto25 || 0, d.netto30 || 0]), 1000);
   const scale = maxVal > 0 ? chartHeight / maxVal : 1;
   const groupWidth = chartWidth / data.length;
   const barWidth = groupWidth * 0.15;
@@ -176,7 +176,7 @@ export default function App() {
     let balance = 0;
     Object.values(monthlyData).forEach(month => {
       (month.expenses || []).forEach(exp => { if (exp.category === "Savings") balance += (exp.amount * (FREQUENCIES[exp.frequency] || 1)); });
-      (month.trackers || []).forEach(tracker => { tracker.entries.forEach(entry => { if (entry.fromSavings) balance -= entry.amount; }); });
+      (month.trackers || []).forEach(tracker => { (tracker.entries || []).forEach(entry => { if (entry.fromSavings) balance -= entry.amount; }); });
     });
     return balance;
   }, [monthlyData]);
@@ -227,6 +227,25 @@ export default function App() {
 
   const updateCategoryColor = (name, color) => setCategories(categories.map(c => c.name === name ? { ...c, color } : c));
   const removeCategory = (name) => { if(window.confirm(`Remove "${name}"?`)) setCategories(categories.filter(c => c.name !== name)); };
+
+  const updateIncomeScenario = (id, field, value) => {
+    setIncomeScenarios(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  const addIncomeScenario = () => {
+    const newId = Date.now();
+    setIncomeScenarios([...incomeScenarios, { id: newId, month: "New Phase", netto25: 0, brutto25: 0, netto30: 0, brutto30: 0 }]);
+  };
+
+  const deleteIncomeScenario = (id) => setIncomeScenarios(incomeScenarios.filter(s => s.id !== id));
+
+  const moveIncomeScenario = (index, dir) => {
+    const arr = [...incomeScenarios];
+    const target = index + dir;
+    if(target < 0 || target >= arr.length) return;
+    [arr[index], arr[target]] = [arr[target], arr[index]];
+    setIncomeScenarios(arr);
+  };
 
   const renderMonthView = () => (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700 pb-10">
@@ -317,7 +336,7 @@ export default function App() {
           {currentMonthData.trackers?.map(tracker => {
             const Icon = AVAILABLE_ICONS[categoryIconMap[tracker.category] || "Circle"];
             const color = categoryColorMap[tracker.category];
-            const total = tracker.entries.reduce((s, e) => s + e.amount, 0);
+            const total = (tracker.entries || []).reduce((s, e) => s + e.amount, 0);
             return (
               <div key={tracker.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
@@ -339,7 +358,7 @@ export default function App() {
                       <tr><th className="px-4 md:px-6 py-3">Date</th><th className="px-4 md:px-6 py-3">Occasion</th><th className="hidden xs:table-cell px-4 md:px-6 py-3 text-center">Fund</th><th className="px-4 md:px-6 py-3 text-right">Sum</th><th className="px-4 md:px-6 py-3 text-center">Action</th></tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                      {tracker.entries.map(e => (
+                      {(tracker.entries || []).map(e => (
                         <tr key={e.id} className={`text-[10px] md:text-xs ${e.fromSavings ? 'bg-amber-50/20' : ''}`}>
                           <td className="px-4 md:px-6 py-2.5 text-slate-400 font-bold whitespace-nowrap">{new Date(e.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}</td>
                           <td className="px-4 md:px-6 py-2.5 font-black text-slate-900">{e.occasion}</td>
@@ -365,6 +384,60 @@ export default function App() {
               </div>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderIncomeScenarios = () => (
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-slate-100 text-center">
+        <h2 className="text-2xl md:text-3xl font-black mb-2 tracking-tight">Salary Scenarios</h2>
+        <p className="text-slate-400 text-xs md:text-sm italic mb-8">Compare employment models and capacity.</p>
+        <CustomBarChart data={incomeScenarios} />
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm table-auto min-w-[500px]">
+            <thead className="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-black border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-4">Phase</th>
+                <th className="px-6 py-4 text-center">25H Netto</th>
+                <th className="hidden md:table-cell px-6 py-4 text-center text-slate-300">25H Brutto</th>
+                <th className="px-6 py-4 text-center">30H Netto</th>
+                <th className="hidden md:table-cell px-6 py-4 text-center text-slate-300">30H Brutto</th>
+                <th className="px-6 py-4 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {incomeScenarios.map((row, index) => (
+                <tr key={row.id} className="hover:bg-slate-50/50 group transition-colors">
+                  <td className="px-6 py-3 font-black text-slate-800">
+                    <input type="text" value={row.month} onChange={(e) => updateIncomeScenario(row.id, 'month', e.target.value)} className="bg-transparent border-none p-0 w-full focus:ring-0 font-black text-sm md:text-base tracking-tighter" />
+                  </td>
+                  <td className="px-6 py-3 text-center">
+                    <input type="number" value={row.netto25} onChange={(e) => updateIncomeScenario(row.id, 'netto25', Number(e.target.value))} className="text-emerald-700 font-black bg-emerald-50 rounded-lg p-1 w-20 text-xs md:text-sm text-center focus:ring-0 border-none" />
+                  </td>
+                  <td className="hidden md:table-cell px-6 py-3 text-slate-300 italic text-center font-bold text-sm">€{row.brutto25}</td>
+                  <td className="px-6 py-3 text-center">
+                    <input type="number" value={row.netto30} onChange={(e) => updateIncomeScenario(row.id, 'netto30', Number(e.target.value))} className="text-blue-700 font-black bg-blue-50 rounded-lg p-1 w-20 text-xs md:text-sm text-center focus:ring-0 border-none" />
+                  </td>
+                  <td className="hidden md:table-cell px-6 py-3 text-slate-300 italic text-center font-bold text-sm">€{row.brutto30}</td>
+                  <td className="px-6 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <button onClick={() => moveIncomeScenario(index, -1)} disabled={index === 0} className="p-1 text-slate-300 hover:text-blue-500 disabled:opacity-10"><ArrowUp size={14}/></button>
+                      <button onClick={() => moveIncomeScenario(index, 1)} disabled={index === incomeScenarios.length - 1} className="p-1 text-slate-300 hover:text-blue-500 disabled:opacity-10"><ArrowDown size={14}/></button>
+                      <button onClick={() => deleteIncomeScenario(row.id)} className="p-1 text-slate-300 hover:text-red-500 ml-1"><Trash2 size={14}/></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex justify-center">
+            <button onClick={addIncomeScenario} className="flex items-center gap-2 px-6 py-2 text-xs font-black text-blue-600 bg-white border border-blue-100 rounded-xl shadow-sm hover:bg-blue-50 transition-all"><Plus size={16}/> Add Phase</button>
+          </div>
         </div>
       </div>
     </div>
@@ -407,25 +480,25 @@ export default function App() {
             </div>
           </div>
 
-          {/* Stats Bar (Redesigned for Mobile Visibility) */}
+          {/* Stats Bar */}
           {activeTab === 'monthly' && (
             <div className="grid grid-cols-3 py-2.5 bg-slate-50 border-t border-slate-100 shadow-inner px-2">
               <div className="flex items-center justify-center gap-1.5 border-r border-slate-200">
-                <div className="hidden xs:block p-1 bg-blue-100 text-blue-600 rounded-md"><Banknote size={12}/></div>
+                <div className="p-1 bg-blue-100 text-blue-600 rounded-md"><Banknote size={12}/></div>
                 <div className="flex flex-col">
                    <p className="text-[6px] font-black text-slate-400 uppercase leading-none mb-0.5">Income</p>
                    <input type="number" value={currentMonthData.income} onChange={(e) => updateMonthlyData({ income: parseFloat(e.target.value) || 0 })} className="text-[9px] md:text-xs font-black text-slate-900 bg-transparent border-none p-0 focus:ring-0 w-12 md:w-16" />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-1.5 border-r border-slate-200">
-                <div className="hidden xs:block p-1 bg-rose-100 text-rose-600 rounded-md"><Flame size={12}/></div>
+                <div className="p-1 bg-rose-100 text-rose-600 rounded-md"><Flame size={12}/></div>
                 <div className="flex flex-col">
                    <p className="text-[6px] font-black text-slate-400 uppercase leading-none mb-0.5">Burn</p>
                    <p className="text-[9px] md:text-xs font-black text-rose-600">€{totalMonthlyBurn.toFixed(0)}</p>
                 </div>
               </div>
               <div className="flex items-center justify-center gap-1.5">
-                <div className="hidden xs:block p-1 bg-emerald-100 text-emerald-600 rounded-md"><ShieldCheck size={12}/></div>
+                <div className="p-1 bg-emerald-100 text-emerald-600 rounded-md"><ShieldCheck size={12}/></div>
                 <div className="flex flex-col">
                    <p className="text-[6px] font-black text-slate-400 uppercase leading-none mb-0.5">Safe</p>
                    <p className={`text-[9px] md:text-xs font-black ${safeToSpend >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>€{safeToSpend.toFixed(0)}</p>
@@ -438,15 +511,7 @@ export default function App() {
         <main className="flex-1 p-3 md:p-14 overflow-y-auto overflow-x-hidden">
           <div className="max-w-6xl mx-auto">
             {activeTab === 'monthly' && renderMonthView()}
-            {activeTab === 'scenarios' && (
-              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-700">
-                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-slate-100 text-center">
-                  <h2 className="text-2xl md:text-3xl font-black mb-2">Salary Scenarios</h2>
-                  <p className="text-slate-400 text-xs md:text-sm italic">Project capacity across models.</p>
-                  <CustomBarChart data={incomeScenarios} />
-                </div>
-              </div>
-            )}
+            {activeTab === 'scenarios' && renderIncomeScenarios()}
             {activeTab === 'settings' && (
               <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-700">
                 <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-slate-100">
@@ -458,7 +523,7 @@ export default function App() {
                   </form>
                   <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-3 md:p-4 bg-slate-50 rounded-2xl h-40 overflow-y-auto mb-6 md:mb-8">
                     {Object.entries(AVAILABLE_ICONS).map(([name, Icon]) => (
-                      <button key={name} type="button" onClick={() => setNewCategoryIcon(name)} className={`p-2 md:p-2.5 rounded-xl border-2 transition-all ${newCategoryIcon === name ? 'border-blue-500 bg-white text-blue-600 scale-110' : 'border-transparent text-slate-400 hover:bg-white'}`}><Icon size={18} md:size={20} /></button>
+                      <button key={name} type="button" onClick={() => setNewCategoryIcon(name)} className={`p-2 md:p-2.5 rounded-xl border-2 transition-all ${newCategoryIcon === name ? 'border-blue-500 bg-white text-blue-600 scale-110' : 'border-transparent text-slate-400 hover:bg-white'}`}><Icon size={18} /></button>
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-2 md:gap-3">
