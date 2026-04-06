@@ -1,0 +1,12 @@
+[build]
+  # This tells Netlify exactly how to install and build your app
+  command = "npm install && npm run build"
+  
+  # This is the default folder Vite creates when it builds your app
+  publish = "dist"
+
+# This ensures that if you ever add multiple pages (React Router), refreshing the page won't break
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
