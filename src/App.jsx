@@ -112,7 +112,7 @@ const CustomBarChart = ({ data }) => {
   const height = 350;
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 1.5;
-  const maxVal = Math.max(...data.flatMap(d => [d.netto25 || 0, d.netto30 || 0]), 1000);
+  const maxVal = Math.max(...(data.length > 0 ? data.flatMap(d => [d.netto25 || 0, d.netto30 || 0]) : [1000]), 1000);
   const scale = maxVal > 0 ? chartHeight / maxVal : 1;
   const groupWidth = data.length > 0 ? chartWidth / data.length : chartWidth;
   const barWidth = groupWidth * 0.15;
@@ -386,8 +386,8 @@ export default function App() {
   );
 
   const renderIncomeScenarios = () => (
-    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700 pb-10">
-      <div className="bg-white rounded-3xl p-6 md:p-12 shadow-xl border border-slate-100 text-center">
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700 pb-10 w-full">
+      <div className="bg-white rounded-3xl p-6 md:p-12 shadow-xl border border-slate-100 text-center w-full">
         <h2 className="text-2xl md:text-4xl font-black mb-3 tracking-tight">Salary Scenarios</h2>
         <p className="text-slate-400 text-xs md:text-base italic mb-10">Project future capacity across employment models.</p>
         <CustomBarChart data={incomeScenarios} />
@@ -397,7 +397,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden w-full">
         <div className="w-full overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-sm table-auto min-w-[500px]">
             <thead className="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-black border-b border-slate-100">
@@ -411,7 +411,7 @@ export default function App() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {incomeScenarios.map((row, index) => (
+              {(incomeScenarios || []).map((row, index) => (
                 <tr key={row.id} className="hover:bg-slate-50/50 group transition-colors">
                   <td className="px-6 py-4 font-black text-slate-800">
                     <input type="text" value={row.month} onChange={(e) => updateIncomeScenario(row.id, 'month', e.target.value)} className="bg-transparent border-none p-0 w-full focus:ring-0 font-black text-sm md:text-base tracking-tighter" />
@@ -466,7 +466,7 @@ export default function App() {
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-slate-50 rounded-xl"><Menu size={24} /></button>
               <div className="flex flex-col">
                 <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="text-xl md:text-3xl font-black text-slate-900 bg-transparent border-none p-0 focus:ring-0 appearance-none cursor-pointer">{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                <span className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Dashboard</span>
+                <span className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Month</span>
               </div>
             </div>
             <div className="bg-slate-900 rounded-xl p-1.5 pl-3 flex items-center gap-3 md:gap-3 border border-slate-800 shadow-lg">
