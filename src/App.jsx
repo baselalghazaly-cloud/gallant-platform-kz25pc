@@ -263,7 +263,7 @@ export default function App() {
            <div className="p-2 bg-blue-600 text-white rounded-lg shadow-md"><CreditCard size={18} /></div>
            <h2 className="text-base md:text-lg font-black text-slate-800 tracking-tight">Recurring Obligations</h2>
         </div>
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-sm min-w-[320px]">
             <thead className="bg-slate-100/50 text-slate-500 uppercase tracking-[0.2em] text-[8px] font-black border-b border-slate-100">
               <tr>
@@ -289,7 +289,7 @@ export default function App() {
                     <td className="hidden sm:table-cell px-4 md:px-6 py-3 text-right text-slate-400 italic text-[11px]">€{exp.amount.toFixed(2)}</td>
                     <td className="px-4 md:px-6 py-3 text-right font-black text-slate-900 text-xs md:text-sm">€{exp.monthlyAmount.toFixed(2)}</td>
                     <td className="px-4 md:px-6 py-3 text-center">
-                      <button onClick={() => deleteExpense(exp.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
+                      <button onClick={() => deleteExpense(exp.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 );
@@ -348,7 +348,7 @@ export default function App() {
                     <button onClick={() => deleteTracker(tracker.id)} className="text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                   <table className="w-full min-w-[320px]">
                     <thead className="bg-slate-50 text-slate-400 text-[8px] font-black uppercase tracking-widest border-b border-slate-100">
                       <tr><th className="px-4 md:px-6 py-3">Date</th><th className="px-4 md:px-6 py-3">Occasion</th><th className="hidden xs:table-cell px-4 md:px-6 py-3 text-center">Fund</th><th className="px-4 md:px-6 py-3 text-right">Sum</th><th className="px-4 md:px-6 py-3 text-center">Action</th></tr>
@@ -398,7 +398,7 @@ export default function App() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="w-full overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-sm table-auto min-w-[500px]">
             <thead className="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-black border-b border-slate-100">
               <tr>
@@ -474,28 +474,28 @@ export default function App() {
                 <p className="text-[7px] font-black text-amber-500 uppercase leading-none mb-0.5">Savings</p>
                 <p className="text-sm md:text-lg font-black text-white leading-none">€{totalSavingsAccount.toLocaleString()}</p>
               </div>
-              <div className="p-2 md:p-2.5 bg-amber-500 text-white rounded-xl shadow-lg shadow-amber-500/20"><PiggyBank size={18} /></div>
+              <div className="p-2 md:p-2.5 bg-amber-500 text-white rounded-xl shadow-lg shadow-amber-500/20"><PiggyBank size={20} /></div>
             </div>
           </div>
 
           {activeTab === 'monthly' && (
             <div className="grid grid-cols-3 py-3 bg-slate-50 border-t border-slate-100 shadow-inner px-2">
               <div className="flex items-center justify-center gap-2 border-r border-slate-200">
-                <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg"><Banknote size={16}/></div>
+                <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg"><Banknote size={20}/></div>
                 <div className="flex flex-col">
                    <p className="text-[7px] font-black text-slate-400 uppercase leading-none mb-1">Income</p>
                    <input type="number" value={currentMonthData.income} onChange={(e) => updateMonthlyData({ income: parseFloat(e.target.value) || 0 })} className="text-[11px] md:text-sm font-black text-slate-900 bg-transparent border-none p-0 focus:ring-0 w-14 md:w-20" />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 border-r border-slate-200">
-                <div className="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><Flame size={16}/></div>
+                <div className="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><Flame size={20}/></div>
                 <div className="flex flex-col">
                    <p className="text-[7px] font-black text-slate-400 uppercase leading-none mb-1">Burn</p>
                    <p className="text-[11px] md:text-sm font-black text-rose-600">€{totalMonthlyBurn.toFixed(0)}</p>
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2">
-                <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg"><ShieldCheck size={16}/></div>
+                <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg"><ShieldCheck size={20}/></div>
                 <div className="flex flex-col">
                    <p className="text-[7px] font-black text-slate-400 uppercase leading-none mb-1">Safe</p>
                    <p className={`text-[11px] md:text-sm font-black ${safeToSpend >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>€{safeToSpend.toFixed(0)}</p>
@@ -505,7 +505,7 @@ export default function App() {
           )}
         </header>
 
-        <main className="flex-1 p-3 md:p-14 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <main className="flex-1 p-3 md:p-14 overflow-y-auto overflow-x-auto custom-scrollbar">
           <div className="max-w-6xl mx-auto">
             {activeTab === 'monthly' && renderMonthView()}
             {activeTab === 'scenarios' && renderIncomeScenarios()}
